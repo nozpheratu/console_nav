@@ -64,7 +64,7 @@ defmodule ConsoleNav.Board do
   defp move_player(old_pos, new_pos, board) do
     {old_row, old_col} = old_pos
     {new_row, new_col} = new_pos
-    unless board[new_row][new_col] == 1 do
+    unless Enum.member?([1, nil], board[new_row][new_col]) do
       board = put_in board[old_row][old_col], 0
       board = put_in board[new_row][new_col], 2
     end
