@@ -134,7 +134,10 @@ defmodule ConsoleNav do
       |> Matrix.to_list
       |> Enum.each(fn(row) ->
         IO.write "#{IO.ANSI.clear_line}\r"
-        IO.inspect row
+        row
+        |> Enum.map(fn(col) -> render(col) end)
+        |> Enum.join( " ")
+        |> IO.puts
       end)
       {:reply, board, board}
     end
@@ -144,6 +147,13 @@ defmodule ConsoleNav do
       IO.write IO.ANSI.home
     end
 
+    defp render(char) do
+      case char do
+        2 -> "@"
+        1 -> "#"
+        _ -> " "
+      end
+    end
   end
   defmodule CLI do
     use GenServer
