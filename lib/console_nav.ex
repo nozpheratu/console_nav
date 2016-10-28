@@ -190,9 +190,6 @@ defmodule ConsoleNav do
 
     defp handle_key(nil), do: :ok
     defp handle_key(key, state) do
-      # This line will clear the input
-      IO.write "\e[2K\r"
-      # {port, game} = state
       game = state.game
       case key do
         :move_up ->
