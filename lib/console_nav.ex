@@ -49,6 +49,9 @@ defmodule ConsoleNav do
   defmodule Board do
     use GenServer
 
+    @player_texture "@"
+    @wall_texture "#"
+
     def start_link do
       GenServer.start_link(__MODULE__, [])
     end
@@ -136,7 +139,7 @@ defmodule ConsoleNav do
         IO.write "#{IO.ANSI.clear_line}\r"
         row
         |> Enum.map(fn(col) -> render(col) end)
-        |> Enum.join( " ")
+        |> Enum.join(" ")
         |> IO.puts
       end)
       {:reply, board, board}
@@ -149,9 +152,9 @@ defmodule ConsoleNav do
 
     defp render(char) do
       case char do
-        2 -> "@"
-        1 -> "#"
-        _ -> " "
+        2 -> "#{IO.ANSI.blue}#{@player_texture}"
+        1 -> "#{IO.ANSI.white}#{@wall_texture}"
+        _ -> "#{IO.ANSI.black} "
       end
     end
   end
