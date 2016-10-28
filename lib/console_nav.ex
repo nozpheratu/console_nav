@@ -5,7 +5,7 @@ defmodule ConsoleNav do
     """
 
     @doc """
-    Converts a multidimensional list into a zero-indexed map.
+    Converts a multidimensional list into a zero-indexed board.
 
     ## Example
 
@@ -17,16 +17,16 @@ defmodule ConsoleNav do
       do_from_list(list)
     end
 
-    defp do_from_list(list, map \\ %{}, index \\ 0)
-    defp do_from_list([], map, _index), do: map
-    defp do_from_list([h|t], map, index) do
-      map = Map.put(map, index, do_from_list(h))
-      do_from_list(t, map, index + 1)
+    defp do_from_list(list, board \\ %{}, index \\ 0)
+    defp do_from_list([], board, _index), do: board
+    defp do_from_list([h|t], board, index) do
+      board = Map.put(board, index, do_from_list(h))
+      do_from_list(t, board, index + 1)
     end
     defp do_from_list(other, _, _), do: other
 
     @doc """
-    Converts a zero-indexed map into a multidimensional list.
+    Converts a zero-indexed board into a multidimensional list.
 
     ## Example
 
@@ -53,8 +53,8 @@ defmodule ConsoleNav do
       GenServer.start_link(__MODULE__, [])
     end
 
-    def init(map) do
-      map = [
+    def init(board) do
+      board = [
         [1, 1, 1, 1, 1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1, 1, 1, 1],
         [1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -73,85 +73,75 @@ defmodule ConsoleNav do
         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       ]
       |> Matrix.from_list
-      {:ok, map}
+      {:ok, board}
     end
 
-    def move(pid, :left), do: GenServer.call(pid, :move_left)
-    def move(pid, :right), do: GenServer.call(pid, :move_right)
-    def move(pid, :up), do: GenServer.call(pid, :move_up)
-    def move(pid, :down), do: GenServer.call(pid, :move_down)
+    def move(pid, :left), do: GenServer.cast(pid, :move_left)
+    def move(pid, :right), do: GenServer.cast(pid, :move_right)
+    def move(pid, :up), do: GenServer.cast(pid, :move_up)
+    def move(pid, :down), do: GenServer.cast(pid, :move_down)
     def draw(pid), do: GenServer.call(pid, :draw)
 
     defp player_in_row(row) do
       Map.values(row) |> Enum.member?(2)
     end
 
-    defp player_location(map) do
-      len = Enum.count(map) - 1
+    defp player_location(board) do
+      len = Enum.count(board) - 1
       Enum.map(0..len, fn(i) ->
-        if player_in_row(map[i]) do
+        if player_in_row(board[i]) do
           row = i
-          col = Enum.find_index(map[row], fn {key, val} -> val == 2 end)
+          col = Enum.find_index(board[row], fn {key, val} -> val == 2 end)
           {row , col}
         end
       end)
       |> Enum.max
     end
 
-    def handle_call(:move_left, _from,  map) do
-      {row, col} = player_location(map)
-      new_map = map
-      unless map[row][col - 1] == 1 do
-        new_map = put_in new_map[row][col], 0
-        new_map = put_in new_map[row][col - 1], 2
+    defp move_player(old_pos, new_pos, board) do
+      {old_row, old_col} = old_pos
+      {new_row, new_col} = new_pos
+      unless board[new_row][new_col] == 1 do
+        board = put_in board[old_row][old_col], 0
+        board = put_in board[new_row][new_col], 2
       end
-      {:reply, map, new_map}
+      board
     end
 
-    def handle_call(:move_right, _from,  map) do
-      {row, col} = player_location(map)
-      new_map = map
-      unless map[row][col + 1] == 1 do
-        new_map = put_in new_map[row][col], 0
-        new_map = put_in new_map[row][col + 1], 2
-      end
-      {:reply, map, new_map}
+    def handle_cast(:move_left, board) do
+      {row, col} = player_location(board)
+      {:noreply,  move_player({row, col}, {row, col - 1}, board)}
     end
 
-    def handle_call(:move_up, _from,  map) do
-      {row, col} = player_location(map)
-      new_map = map
-      unless map[row - 1][col] == 1 do
-        new_map = put_in new_map[row][col], 0
-        new_map = put_in new_map[row - 1][col], 2
-      end
-      {:reply, map, new_map}
+    def handle_cast(:move_right, board) do
+      {row, col} = player_location(board)
+      {:noreply, move_player({row, col}, {row, col + 1}, board)}
     end
 
-    def handle_call(:move_down, _from, map) do
-      {row, col} = player_location(map)
-      new_map = map
-      unless map[row + 1][col] == 1 do
-        new_map = put_in new_map[row][col], 0
-        new_map = put_in new_map[row + 1][col], 2
-      end
-      {:reply, map, new_map}
+    def handle_cast(:move_up, board) do
+      {row, col} = player_location(board)
+      {:noreply, move_player({row, col}, {row - 1, col}, board)}
     end
 
-    def handle_call(:draw, _from, map) do
-      clear_map
-      map
+    def handle_cast(:move_down, board) do
+      {row, col} = player_location(board)
+      {:noreply, move_player({row, col}, {row + 1, col}, board)}
+    end
+
+    def handle_call(:draw, _from, board) do
+      clear_board
+      board
       |> Matrix.to_list
-      |> Enum.each(fn(y) ->
-        IO.write "\e[2K\r"
-        IO.inspect y
+      |> Enum.each(fn(row) ->
+        IO.write "#{IO.ANSI.clear_line}\r"
+        IO.inspect row
       end)
-      {:reply, map, map}
+      {:reply, board, board}
     end
 
-    defp clear_map do
-      IO.puts "\e[2J"
-      IO.puts "\e[0;0H"
+    defp clear_board do
+      IO.write IO.ANSI.clear
+      IO.write IO.ANSI.home
     end
 
   end
@@ -170,7 +160,6 @@ defmodule ConsoleNav do
       }
       IO.puts "\e[?25l" # hide cursor
       # puts "\e[?25h" # show cursor
-      clear_screen
       {:ok, state}
     end
 
@@ -181,7 +170,6 @@ defmodule ConsoleNav do
       {:noreply, state}
     end
 
-    # terminal control escape sequences
     defp translate("\e[A"), do: :move_up
     defp translate("\e[B"), do: :move_down
     defp translate("\e[C"), do: :move_right
@@ -201,13 +189,6 @@ defmodule ConsoleNav do
         :move_left ->
           ConsoleNav.Board.move(game, :left)
       end
-    end
-
-    defp clear_screen do
-      # erase screen
-      IO.puts "\e[2J"
-      # reset cursor position
-      IO.puts "\e[0;0H"
     end
   end
 
