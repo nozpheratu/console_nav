@@ -30,7 +30,7 @@ defmodule ConsoleNav.CLI do
   defp translate("\e[D"), do: :move_left
   defp translate(_),      do: nil
 
-  defp handle_key(nil), do: :ok
+  defp handle_key(nil, _state), do: :ok
   defp handle_key(key, state) do
     game = state.game
     case key do
