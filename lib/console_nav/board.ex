@@ -120,5 +120,14 @@ defmodule ConsoleNav.Board do
       |> Enum.join(" ")
       |> IO.puts
     end)
+      IO.write IO.ANSI.cyan
+      IO.write "#{IO.ANSI.clear_line}\r"
+      IO.puts "\n\n"
+      IO.write "#{IO.ANSI.clear_line}\r"
+      IO.puts "CONTROLS:"
+      IO.write "#{IO.ANSI.clear_line}\r"
+      IO.puts "Arrow keys to navigate"
+      IO.write "#{IO.ANSI.clear_line}\r"
+      IO.write "Shift + x = exit"
   end
 end

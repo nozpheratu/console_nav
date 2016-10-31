@@ -13,7 +13,6 @@ defmodule ConsoleNav.CLI do
       game: game
     }
     IO.puts "\e[?25l" # hide cursor
-    # puts "\e[?25h" # show cursor
     {:ok, state}
   end
 
@@ -28,6 +27,7 @@ defmodule ConsoleNav.CLI do
   defp translate("\e[B"), do: :move_down
   defp translate("\e[C"), do: :move_right
   defp translate("\e[D"), do: :move_left
+  defp translate("X"), do: :X
   defp translate(_),      do: nil
 
   defp handle_key(nil, _state), do: :ok
@@ -42,6 +42,10 @@ defmodule ConsoleNav.CLI do
         Board.move(game, :right)
       :move_left ->
         Board.move(game, :left)
+      :X ->
+        IO.write "\e[?25h" # show cursor
+        IO.write IO.ANSI.reset
+        :init.stop
     end
   end
 end
