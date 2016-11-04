@@ -1,6 +1,6 @@
 defmodule ConsoleNav.CLI do
   use GenServer
-  alias ConsoleNav.Board
+  alias ConsoleNav.Navigator
 
   def start_link(game) do
     GenServer.start_link(ConsoleNav.CLI, game)
@@ -19,7 +19,6 @@ defmodule ConsoleNav.CLI do
   def handle_info({_pid, {:data, data}}, state) do
     translate(data)
     |> handle_key(state)
-    ConsoleNav.Board.draw(state.game)
     {:noreply, state}
   end
 
@@ -35,13 +34,13 @@ defmodule ConsoleNav.CLI do
     game = state.game
     case key do
       :move_up ->
-        Board.move(game, :up)
+        Navigator.move(game, :up)
       :move_down ->
-        Board.move(game, :down)
+        Navigator.move(game, :down)
       :move_right ->
-        Board.move(game, :right)
+        Navigator.move(game, :right)
       :move_left ->
-        Board.move(game, :left)
+        Navigator.move(game, :left)
       :X ->
         IO.write "\e[?25h" # show cursor
         IO.write IO.ANSI.reset
