@@ -1,3 +1,4 @@
+# http://blog.danielberkompas.com/2016/04/23/multidimensional-arrays-in-elixir.html
 defmodule ConsoleNav.Matrix do
   @moduledoc """
   Helpers for working with multidimensional lists, also called matrices.
