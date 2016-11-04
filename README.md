@@ -1,8 +1,7 @@
-Example app from:
-https://github.com/knewter/extris
+# Console Nav
 
-Also checkout the wolfentext in ~/development/ruby/wolfentext.rb for more
-reference
+Simple Elixir terminal game. Walk around and get the money. To run just download
+the project and run `./console_nav` in your terminal.
 
-Note this project has a local .vimrc file to quickly build and run the CLI, just
-use the ,. keybinding in vim
+
+![screenshot](screenshot.png)
