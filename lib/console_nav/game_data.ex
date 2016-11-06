@@ -1,4 +1,5 @@
 defmodule ConsoleNav.GameData do
+  use GenServer
   alias ConsoleNav.Matrix
 
   ####################
@@ -25,60 +26,28 @@ defmodule ConsoleNav.GameData do
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   ]
-  @coin_texture "$"
-  @player_texture "@"
-  @wall_texture "#"
 
   def initial_state do
-    board = Matrix.from_list(@initial_board)
-    %{board: board, wallet: 0}
+    %{board: Matrix.from_list(@initial_board), wallet: 0}
   end
 
-  def draw(state) do
-    clear_board
-    state.board
-    |> Matrix.to_list
-    |> Enum.each(fn(row) ->
-      IO.write "#{IO.ANSI.clear_line}\r"
-      row
-      |> Enum.map(fn(col) -> render(col) end)
-      |> Enum.join(" ")
-      |> IO.puts
-    end)
-      print_wallet(state.wallet)
-      print_controls
-    state
+  def start_link do
+    GenServer.start_link(__MODULE__, initial_state, name: GameState)
   end
 
-  defp render(char) do
-    case char do
-      3 -> "#{IO.ANSI.yellow}#{@coin_texture}"
-      2 -> "#{IO.ANSI.blue}#{@player_texture}"
-      1 -> "#{IO.ANSI.white}#{@wall_texture}"
-      _ -> "#{IO.ANSI.black} "
-    end
+  def init(initial_state) do
+    {:ok, initial_state}
   end
 
-  defp clear_board do
-    IO.write IO.ANSI.clear
-    IO.write IO.ANSI.home
+  def state(pid), do: GenServer.call(pid, :state)
+
+  def set(pid, board), do: GenServer.cast(pid, {:set, board})
+
+  def handle_cast({:set, assigned_state}, state) do
+    {:noreply, Map.merge(state, assigned_state)}
   end
 
-  defp print_wallet(wallet) do
-    IO.write "\n\n"
-    IO.write "#{IO.ANSI.clear_line}\r"
-    IO.write IO.ANSI.red
-    IO.write "Wallet: #{wallet}"
-  end
-
-  defp print_controls do
-    IO.write "\n\n"
-    IO.write IO.ANSI.cyan
-    IO.write "#{IO.ANSI.clear_line}\r"
-    IO.puts "CONTROLS:"
-    IO.write "#{IO.ANSI.clear_line}\r"
-    IO.puts "Arrow keys to navigate"
-    IO.write "#{IO.ANSI.clear_line}\r"
-    IO.write "Shift + x = exit"
+  def handle_call(:state, _from, state) do
+    {:reply, state, state}
   end
 end
