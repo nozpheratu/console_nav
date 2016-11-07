@@ -4,17 +4,17 @@ defmodule ConsoleNav.Navigator do
 
   def start_link do
     state = GameData.state
-    GenServer.start_link(__MODULE__, state)
+    GenServer.start_link(__MODULE__, state, name: __MODULE__)
   end
 
   def init(state) do
     {:ok, state}
   end
 
-  def move(pid, :left), do: GenServer.cast(pid, :move_left)
-  def move(pid, :right), do: GenServer.cast(pid, :move_right)
-  def move(pid, :up), do: GenServer.cast(pid, :move_up)
-  def move(pid, :down), do: GenServer.cast(pid, :move_down)
+  def move(:left), do: GenServer.cast(__MODULE__, :move_left)
+  def move(:right), do: GenServer.cast(__MODULE__, :move_right)
+  def move(:up), do: GenServer.cast(__MODULE__, :move_up)
+  def move(:down), do: GenServer.cast(__MODULE__, :move_down)
 
   defp player_in_row(row) do
     Map.values(row) |> Enum.member?(2)

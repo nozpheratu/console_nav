@@ -6,8 +6,8 @@ defmodule ConsoleNav do
 
   def main(_args) do
     GameData.start_link
-    {:ok, navigator} = Navigator.start_link
-    CLI.start_link(navigator)
+    Navigator.start_link
+    CLI.start_link
     Renderer.start_link
 
     :erlang.hibernate(Kernel, :exit, [:killed])

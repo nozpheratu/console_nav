@@ -2,24 +2,20 @@ defmodule ConsoleNav.CLI do
   use GenServer
   alias ConsoleNav.Navigator
 
-  def start_link(game) do
-    GenServer.start_link(ConsoleNav.CLI, game)
+  def start_link do
+    GenServer.start_link(ConsoleNav.CLI, nil)
   end
 
-  def init(game) do
+  def init(_) do
     port = Port.open({:spawn, "tty_sl -c -e"}, [:binary, :eof])
-    state = %{
-      port: port,
-      game: game
-    }
     IO.puts "\e[?25l" # hide cursor
-    {:ok, state}
+    {:ok, port}
   end
 
-  def handle_info({_pid, {:data, data}}, state) do
+  def handle_info({_pid, {:data, data}}, port) do
     translate(data)
-    |> handle_key(state)
-    {:noreply, state}
+    |> handle_key
+    {:noreply, port}
   end
 
   defp translate("\e[A"), do: :move_up
@@ -29,18 +25,17 @@ defmodule ConsoleNav.CLI do
   defp translate("X"), do: :X
   defp translate(_),      do: nil
 
-  defp handle_key(nil, _state), do: :ok
-  defp handle_key(key, state) do
-    game = state.game
+  defp handle_key(nil), do: :ok
+  defp handle_key(key) do
     case key do
       :move_up ->
-        Navigator.move(game, :up)
+        Navigator.move(:up)
       :move_down ->
-        Navigator.move(game, :down)
+        Navigator.move(:down)
       :move_right ->
-        Navigator.move(game, :right)
+        Navigator.move(:right)
       :move_left ->
-        Navigator.move(game, :left)
+        Navigator.move(:left)
       :X ->
         IO.write "\e[?25h" # show cursor
         IO.write IO.ANSI.reset
