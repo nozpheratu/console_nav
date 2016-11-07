@@ -15,7 +15,6 @@ defmodule ConsoleNav.Navigator do
   def move(pid, :right), do: GenServer.cast(pid, :move_right)
   def move(pid, :up), do: GenServer.cast(pid, :move_up)
   def move(pid, :down), do: GenServer.cast(pid, :move_down)
-  def draw(pid), do: GenServer.call(pid, :draw)
 
   defp player_in_row(row) do
     Map.values(row) |> Enum.member?(2)
@@ -67,10 +66,5 @@ defmodule ConsoleNav.Navigator do
   def handle_cast(:move_down, state) do
     {row, col} = player_location(state)
     {:noreply, move_player({row, col}, {row + 1, col}, state)}
-  end
-
-  def handle_call(:draw, _from, state) do
-    GameData.draw(state)
-    {:reply, state, state}
   end
 end
