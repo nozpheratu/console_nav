@@ -24,7 +24,7 @@ defmodule ConsoleNav.Renderer do
   end
 
   def draw do
-    state = GameData.state(GameState)
+    state = GameData.state
     clear_board
     state.board
     |> Matrix.to_list

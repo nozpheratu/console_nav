@@ -3,7 +3,7 @@ defmodule ConsoleNav.Navigator do
   alias ConsoleNav.GameData
 
   def start_link do
-    state = GameData.state(GameState)
+    state = GameData.state
     GenServer.start_link(__MODULE__, state)
   end
 
@@ -44,8 +44,8 @@ defmodule ConsoleNav.Navigator do
       board = put_in board[new_row][new_col], 2
     end
     new_game_state = %{board: board, wallet: (if move_to == 3, do: wallet + 1, else: wallet)}
-    GameData.set(GameState, new_game_state)
-    GameData.state(GameState)
+    GameData.set(new_game_state)
+    GameData.state
   end
 
   def handle_cast(:move_left, state) do

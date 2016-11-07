@@ -32,16 +32,16 @@ defmodule ConsoleNav.GameData do
   end
 
   def start_link do
-    GenServer.start_link(__MODULE__, initial_state, name: GameState)
+    GenServer.start_link(__MODULE__, initial_state, name: __MODULE__)
   end
 
   def init(initial_state) do
     {:ok, initial_state}
   end
 
-  def state(pid), do: GenServer.call(pid, :state)
+  def state, do: GenServer.call(__MODULE__, :state)
 
-  def set(pid, board), do: GenServer.cast(pid, {:set, board})
+  def set(state), do: GenServer.cast(__MODULE__, {:set, state})
 
   def handle_cast({:set, assigned_state}, state) do
     {:noreply, Map.merge(state, assigned_state)}
