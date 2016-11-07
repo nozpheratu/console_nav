@@ -22,7 +22,7 @@ defmodule ConsoleNav.CLI do
   defp translate("\e[B"), do: :move_down
   defp translate("\e[C"), do: :move_right
   defp translate("\e[D"), do: :move_left
-  defp translate("X"), do: :X
+  defp translate("X"), do: :exit
   defp translate(_),      do: nil
 
   defp handle_key(nil), do: :ok
@@ -36,7 +36,7 @@ defmodule ConsoleNav.CLI do
         Navigator.move(:right)
       :move_left ->
         Navigator.move(:left)
-      :X ->
+      :exit ->
         IO.write "\e[?25h" # show cursor
         IO.write IO.ANSI.reset
         :init.stop
