@@ -3,7 +3,7 @@ defmodule ConsoleNav.CLI do
   alias ConsoleNav.Navigator
 
   def start_link do
-    GenServer.start_link(ConsoleNav.CLI, nil)
+    GenServer.start_link(__MODULE__, nil)
   end
 
   def init(_) do
