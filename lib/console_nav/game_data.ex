@@ -5,9 +5,10 @@ defmodule ConsoleNav.GameData do
   ####################
   ##### Legend #######
   ####################
+  # 0: empty
   # 1: wall
   # 2: player
-  # 3: empty
+  # 3: coin
   @initial_board [
     [1, 1, 1, 1, 1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,1, 1, 1, 1],
     [1, 2, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
