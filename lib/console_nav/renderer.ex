@@ -1,6 +1,7 @@
 defmodule ConsoleNav.Renderer do
   alias ConsoleNav.Matrix
   alias ConsoleNav.GameData
+  alias ConsoleNav.Navigator
   use GenServer
 
   @coin_texture "$"
@@ -28,10 +29,12 @@ defmodule ConsoleNav.Renderer do
     clear_board
     state.board
     |> Matrix.to_list
-    |> Enum.each(fn(row) ->
+    |> Enum.with_index
+    |> Enum.each(fn({row, x}) ->
       IO.write "#{IO.ANSI.clear_line}\r"
       row
-      |> Enum.map(fn(col) -> render(col) end)
+      |> Enum.with_index
+      |> Enum.map(fn({col, y}) -> render_cell(col, {x, y}) end)
       |> Enum.join(" ")
       |> IO.puts
     end)
@@ -40,12 +43,16 @@ defmodule ConsoleNav.Renderer do
     state
   end
 
-  defp render(char) do
-    case char do
-      3 -> "#{IO.ANSI.yellow}#{@coin_texture}"
-      2 -> "#{IO.ANSI.blue}#{@player_texture}"
-      1 -> "#{IO.ANSI.white}#{@wall_texture}"
-      _ -> "#{IO.ANSI.black} "
+  defp render_cell(char, coords) do
+    player_location = Navigator.state
+    if coords == player_location do
+      "#{IO.ANSI.blue}#{@player_texture}"
+    else
+      case char do
+        3 -> "#{IO.ANSI.yellow}#{@coin_texture}"
+        1 -> "#{IO.ANSI.white}#{@wall_texture}"
+        _ -> "#{IO.ANSI.black} "
+      end
     end
   end
 
