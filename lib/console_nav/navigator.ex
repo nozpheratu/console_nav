@@ -11,7 +11,7 @@ defmodule ConsoleNav.Navigator do
     {:ok, state}
   end
 
-  defp move_player(old_pos, new_pos, state) do
+  defp move(old_pos, new_pos, state) do
     game_state = GameData.state
     board =  game_state.board
     wallet = game_state.wallet
@@ -28,22 +28,22 @@ defmodule ConsoleNav.Navigator do
 
   def handle_cast(:move_left, state) do
     {row, col} = state
-    {:noreply,  move_player({row, col}, {row, col - 1}, state)}
+    {:noreply,  move({row, col}, {row, col - 1}, state)}
   end
 
   def handle_cast(:move_right, state) do
     {row, col} = state
-    {:noreply, move_player({row, col}, {row, col + 1}, state)}
+    {:noreply, move({row, col}, {row, col + 1}, state)}
   end
 
   def handle_cast(:move_up, state) do
     {row, col} = state
-    {:noreply, move_player({row, col}, {row - 1, col}, state)}
+    {:noreply, move({row, col}, {row - 1, col}, state)}
   end
 
   def handle_cast(:move_down, state) do
     {row, col} = state
-    {:noreply, move_player({row, col}, {row + 1, col}, state)}
+    {:noreply, move({row, col}, {row + 1, col}, state)}
   end
 
   def state, do: GenServer.call(__MODULE__, :state)
