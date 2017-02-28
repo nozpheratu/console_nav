@@ -4,6 +4,7 @@ defmodule ConsoleNav.Renderer do
   alias ConsoleNav.Navigator
   use GenServer
 
+  @refresh_interval 100
   @coin_texture "$"
   @player_texture "@"
   @wall_texture "#"
@@ -14,36 +15,32 @@ defmodule ConsoleNav.Renderer do
 
   def init(_) do
     draw
-    Process.send_after(self, :draw, 100)
-    {:ok, nil}
   end
 
-  def handle_info(:draw, _) do
-    draw
-    Process.send_after(self, :draw, 50)
-    {:noreply, nil}
-  end
-
-  def draw do
+  defp draw do
     state = GameData.state
     clear_board
     state.board
     |> Matrix.to_list
     |> Enum.with_index
-    |> Enum.each(fn({row, x}) ->
-      IO.write "#{IO.ANSI.clear_line}\r"
-      row
-      |> Enum.with_index
-      |> Enum.map(fn({col, y}) -> render_cell(col, {x, y}) end)
-      |> Enum.join(" ")
-      |> IO.puts
-    end)
-      print_wallet(state.wallet)
-      print_controls
-    state
+    |> Enum.each(&draw_line/1)
+    print_wallet(state)
+    print_controls
+    :timer.sleep @refresh_interval
+    draw
   end
 
-  defp render_cell(char, coords) do
+  defp draw_line(line) do
+    {row, x} = line
+    IO.write "#{IO.ANSI.clear_line}\r"
+    row
+    |> Enum.with_index
+    |> Enum.map(fn({col, y}) -> draw_cell(col, {x, y}) end)
+    |> Enum.join(" ")
+    |> IO.puts
+  end
+
+  defp draw_cell(char, coords) do
     player_location = Navigator.state
     if coords == player_location do
       "#{IO.ANSI.blue}#{@player_texture}"
@@ -57,25 +54,32 @@ defmodule ConsoleNav.Renderer do
   end
 
   defp clear_board do
-    IO.write IO.ANSI.clear
-    IO.write IO.ANSI.home
+    IO.write [
+      IO.ANSI.clear,
+      IO.ANSI.home
+    ]
   end
 
-  defp print_wallet(wallet) do
-    IO.write "\n\n"
-    IO.write "#{IO.ANSI.clear_line}\r"
-    IO.write IO.ANSI.red
-    IO.write "Wallet: #{wallet}"
+  defp print_wallet(state) do
+    wallet = state.wallet
+    IO.puts [
+      "\n\n#{IO.ANSI.clear_line}\r",
+      IO.ANSI.red,
+      "Wallet: #{wallet}"
+    ]
   end
 
   defp print_controls do
-    IO.write "\n\n"
-    IO.write IO.ANSI.cyan
-    IO.write "#{IO.ANSI.clear_line}\r"
-    IO.puts "CONTROLS:"
-    IO.write "#{IO.ANSI.clear_line}\r"
-    IO.puts "Arrow keys to navigate"
-    IO.write "#{IO.ANSI.clear_line}\r"
-    IO.write "Shift + x = exit"
+    IO.puts  [
+      IO.ANSI.cyan,
+      "#{IO.ANSI.clear_line}\r",
+      "CONTROLS:\n",
+      "#{IO.ANSI.clear_line}\r",
+      "Arrow keys to navigate\n",
+      "#{IO.ANSI.clear_line}\r",
+      "Shift + x = exit\n",
+      "#{IO.ANSI.clear_line}\r",
+      IO.ANSI.reset
+    ]
   end
 end
