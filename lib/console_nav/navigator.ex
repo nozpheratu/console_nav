@@ -2,9 +2,6 @@ defmodule ConsoleNav.Navigator do
   use GenServer
   alias ConsoleNav.GameData
 
-  @right [1,0]
-  @up [0, 1]
-
   def start_link do
     inital_state = {1, 1}
     GenServer.start_link(__MODULE__, inital_state, name: __MODULE__)
