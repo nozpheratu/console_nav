@@ -6,13 +6,13 @@ defmodule ConsoleNav.CLI do
     :timer.sleep(:infinity)
   end
 
-  def init do
+  defp init do
     {:ok, Port.open({:spawn, "tty_sl -c -e"}, [:binary, :eof])}
     IO.puts "\e[?25l" # hide cursor
     loop
   end
 
-  def loop do
+  defp loop do
     receive do
       {_port, {:data, data}} ->
         translate(data)
