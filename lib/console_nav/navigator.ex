@@ -8,29 +8,12 @@ defmodule ConsoleNav.Navigator do
   @down {0, 1}
 
   def start_link do
-    inital_state = {1, 1}
-    GenServer.start_link(__MODULE__, inital_state, name: __MODULE__)
+    inital_pos = {1, 1}
+    GenServer.start_link(__MODULE__, inital_pos, name: __MODULE__)
   end
 
   def init(state) do
     {:ok, state}
-  end
-
-  defp move(old_pos, dir) do
-    game_state = GameData.state
-    board =  game_state.board
-    wallet = game_state.wallet
-    {old_row, old_col} = old_pos
-    {x, y} = dir
-    new_row = old_row + y
-    new_col = old_col + x
-    move_to = board[new_row][new_col]
-    # ensure that anywhere the player moves is assigned as a blank space
-    board = put_in board[old_row][old_col], 0
-    %{board: board, wallet: (if move_to == 3, do: wallet + 1, else: wallet)}
-    |> GameData.set
-    # Move or don't move according to the collision check
-    unless (Enum.member?([1, nil], move_to)), do: {new_row, new_col}, else: old_pos
   end
 
   def handle_cast(:move_left, state), do: {:noreply, move(state, @left)}
@@ -48,4 +31,24 @@ defmodule ConsoleNav.Navigator do
   def move(:right), do: GenServer.cast(__MODULE__, :move_right)
   def move(:up), do: GenServer.cast(__MODULE__, :move_up)
   def move(:down), do: GenServer.cast(__MODULE__, :move_down)
+
+  defp move(origin, dir) do
+    {row, col} = origin
+    {x, y} = dir
+    destination = {row + y, col + x}
+    unless collision?(destination, row, col), do: destination, else: origin
+  end
+
+  defp collision?(destination, old_row, old_col) do
+    {new_row, new_col} = destination
+    game_state = GameData.state
+    board =  game_state.board
+    wallet = game_state.wallet
+    # ensure that anywhere the player moves is assigned as a blank space
+    board = put_in board[old_row][old_col], 0
+    cell = board[new_row][new_col]
+    %{board: board, wallet: (if cell == 3, do: wallet + 1, else: wallet)}
+    |> GameData.set
+    Enum.member?([1, nil], cell)
+  end
 end
