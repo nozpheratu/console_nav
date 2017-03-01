@@ -2,16 +2,13 @@ defmodule ConsoleNav.Renderer do
   alias ConsoleNav.Matrix
   alias ConsoleNav.GameData
   alias ConsoleNav.Navigator
-  use GenServer
 
   @refresh_interval 100
   @coin "$ "
   @player "\x{2588}\x{2588}"
   @wall "\x{2588}\x{2588}"
 
-  def start_link, do: GenServer.start_link(__MODULE__, nil)
-
-  def init(_), do: loop
+  def start, do: loop
 
   defp loop do
     state = GameData.state

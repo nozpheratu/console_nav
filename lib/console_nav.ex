@@ -8,7 +8,7 @@ defmodule ConsoleNav do
     GameData.start_link
     Navigator.start_link
     CLI.start_link
-    Renderer.start_link
+    Renderer.start
 
     :erlang.hibernate(Kernel, :exit, [:killed])
   end
