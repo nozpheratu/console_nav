@@ -24,8 +24,11 @@ defmodule ConsoleNav.Renderer do
     |> Matrix.to_list
     |> Enum.with_index
     |> Enum.each(&draw_line/1)
-    print_wallet(state)
-    print_controls
+    IO.write [
+      IO.ANSI.reset,
+      print_wallet(state),
+      print_controls
+    ]
     :timer.sleep @refresh_interval
     draw
   end
@@ -43,12 +46,12 @@ defmodule ConsoleNav.Renderer do
   defp draw_cell(char, coords) do
     player_location = Navigator.state
     if coords == player_location do
-      "#{IO.ANSI.blue}#{@player_texture}"
+      [IO.ANSI.bright, IO.ANSI.blue, @player_texture, IO.ANSI.reset]
     else
       case char do
-        3 -> "#{IO.ANSI.yellow}#{@coin_texture}"
-        1 -> "#{IO.ANSI.white}#{@wall_texture}"
-        _ -> "#{IO.ANSI.black} "
+        3 -> [IO.ANSI.bright, IO.ANSI.yellow, @coin_texture, IO.ANSI.reset]
+        1 -> [IO.ANSI.white, @wall_texture]
+        _ -> [IO.ANSI.black, " "]
       end
     end
   end
@@ -62,20 +65,20 @@ defmodule ConsoleNav.Renderer do
 
   defp print_wallet(state) do
     wallet = state.wallet
-    IO.puts [
-      "\n\n#{IO.ANSI.clear_line}\r",
-      IO.ANSI.red,
-      "Wallet: #{wallet}"
+    [
+     "\n#{IO.ANSI.clear_line}\r",
+      "Wallet: ",
+      IO.ANSI.bright,
+      IO.ANSI.yellow,
+      "#{wallet}",
+      IO.ANSI.reset
     ]
   end
 
   defp print_controls do
-    IO.puts  [
-      IO.ANSI.cyan,
-      "#{IO.ANSI.clear_line}\r",
-      "CONTROLS:\n",
-      "#{IO.ANSI.clear_line}\r",
-      "Arrow keys to navigate\n",
+    [
+      "\n#{IO.ANSI.clear_line}\r",
+      "Controls: Arrow keys\n",
       "#{IO.ANSI.clear_line}\r",
       "Shift + x = exit\n",
       "#{IO.ANSI.clear_line}\r",
