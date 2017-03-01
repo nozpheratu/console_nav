@@ -51,8 +51,7 @@ defmodule ConsoleNav.Renderer do
   defp draw_wallet(wallet) do
     [
       IO.ANSI.reset,
-      "\n#{IO.ANSI.clear_line}\r",
-      "Wallet: ",
+      "\n\rWallet: ",
       IO.ANSI.bright,
       IO.ANSI.yellow,
       "#{wallet}",
@@ -62,10 +61,8 @@ defmodule ConsoleNav.Renderer do
 
   defp draw_controls do
     [
-      "\n#{IO.ANSI.clear_line}\r",
-      "Controls: Arrow keys\n",
-      "#{IO.ANSI.clear_line}\r",
-      "Shift + x = exit\n",
+      "\n\rControls: Arrow keys",
+      "\n\rShift + x = exit\n",
       "#{IO.ANSI.clear_line}\r",
       IO.ANSI.reset
     ]
