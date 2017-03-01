@@ -15,7 +15,10 @@ defmodule ConsoleNav.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger]]
+    [
+      applications: [:logger],
+      mod: { ConsoleNav, [] }
+    ]
   end
 
   # Dependencies can be Hex packages:
@@ -33,7 +36,7 @@ defmodule ConsoleNav.Mixfile do
 
   defp escript do
     [
-      main_module: ConsoleNav,
+      main_module: ConsoleNav.CLI,
       emu_args: "-noinput -elixir ansi_enabled true"
     ]
   end

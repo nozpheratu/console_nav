@@ -1,15 +1,13 @@
 defmodule ConsoleNav do
-  alias ConsoleNav.CLI
+  use Application
   alias ConsoleNav.Navigator
   alias ConsoleNav.Renderer
   alias ConsoleNav.GameData
 
-  def main(_args) do
+  def start(_type, _args) do
     GameData.start_link
     Navigator.start_link
-    CLI.start_link
-    Renderer.start
-
-    :erlang.hibernate(Kernel, :exit, [:killed])
+    spawn(fn() -> Renderer.start end)
+    ConsoleNav.Supervisor.start_link
   end
 end
