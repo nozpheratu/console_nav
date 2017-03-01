@@ -26,8 +26,8 @@ defmodule ConsoleNav.Renderer do
     |> Enum.each(&draw_line/1)
     IO.write [
       IO.ANSI.reset,
-      print_wallet(state),
-      print_controls
+      draw_wallet(state),
+      draw_controls
     ]
     :timer.sleep @refresh_interval
     draw
@@ -63,7 +63,7 @@ defmodule ConsoleNav.Renderer do
     ]
   end
 
-  defp print_wallet(state) do
+  defp draw_wallet(state) do
     wallet = state.wallet
     [
      "\n#{IO.ANSI.clear_line}\r",
@@ -75,7 +75,7 @@ defmodule ConsoleNav.Renderer do
     ]
   end
 
-  defp print_controls do
+  defp draw_controls do
     [
       "\n#{IO.ANSI.clear_line}\r",
       "Controls: Arrow keys\n",
