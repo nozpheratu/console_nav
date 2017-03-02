@@ -34,13 +34,13 @@ defmodule ConsoleNav.CLI do
   defp handle_key(key) do
     case key do
       :up ->
-        Navigator.move(:up)
+        Navigator.input(:up)
       :down ->
-        Navigator.move(:down)
+        Navigator.input(:down)
       :right ->
-        Navigator.move(:right)
+        Navigator.input(:right)
       :left ->
-        Navigator.move(:left)
+        Navigator.input(:left)
       :exit ->
         IO.write "\e[?25h" # show cursor
         IO.write IO.ANSI.reset

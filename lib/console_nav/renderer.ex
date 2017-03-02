@@ -35,7 +35,10 @@ defmodule ConsoleNav.Renderer do
   end
 
   defp draw_cell(char, pos) do
-    if pos == Navigator.state do
+    if pos == Navigator.position do
+      # Flag the player as stationary each time they are rendered. This prevents
+      # the player from being able to move multiple cells per render cycle.
+      Navigator.stop
       [IO.ANSI.blue, @player, IO.ANSI.reset]
     else
       case char do

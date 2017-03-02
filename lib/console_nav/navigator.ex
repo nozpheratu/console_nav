@@ -8,35 +8,44 @@ defmodule ConsoleNav.Navigator do
   @down {0, 1}
 
   def start_link do
-    inital_pos = {1, 1}
-    GenServer.start_link(__MODULE__, inital_pos, name: __MODULE__)
+    state = %{moving: false, position: {1, 1}}
+    GenServer.start_link(__MODULE__, state, name: __MODULE__)
   end
 
   def init(state) do
     {:ok, state}
   end
 
-  def handle_cast(:move_left, state), do: {:noreply, move(state, @left)}
-  def handle_cast(:move_right, state), do: {:noreply, move(state, @right)}
-  def handle_cast(:move_up, state), do: {:noreply, move(state, @up)}
-  def handle_cast(:move_down, state), do: {:noreply, move(state, @down)}
+  def handle_cast(:left, state), do: {:noreply, move(state, @left)}
+  def handle_cast(:right, state), do: {:noreply, move(state, @right)}
+  def handle_cast(:up, state), do: {:noreply, move(state, @up)}
+  def handle_cast(:down, state), do: {:noreply, move(state, @down)}
 
-  def state, do: GenServer.call(__MODULE__, :state)
-
-  def handle_call(:state, _from, state) do
-    {:reply, state, state}
+  def position, do: GenServer.call(__MODULE__, :position)
+  def handle_call(:position, _from, state) do
+    {:reply, state.position, state}
   end
 
-  def move(:left), do: GenServer.cast(__MODULE__, :move_left)
-  def move(:right), do: GenServer.cast(__MODULE__, :move_right)
-  def move(:up), do: GenServer.cast(__MODULE__, :move_up)
-  def move(:down), do: GenServer.cast(__MODULE__, :move_down)
+  def stop, do: GenServer.cast(__MODULE__, :stop)
+  def handle_cast(:stop, %{position: pos}) do
+    {:noreply, %{moving: false, position: pos}}
+  end
 
-  defp move(origin, dir) do
-    {row, col} = origin
+  def input(:left), do: GenServer.cast(__MODULE__, :left)
+  def input(:right), do: GenServer.cast(__MODULE__, :right)
+  def input(:up), do: GenServer.cast(__MODULE__, :up)
+  def input(:down), do: GenServer.cast(__MODULE__, :down)
+
+  defp move(state = %{moving: moving}, _dir) when moving, do: state
+  defp move(%{position: position}, dir) do
+    {row, col} = position
     {x, y} = dir
     destination = {row + y, col + x}
-    unless collision?(destination, row, col), do: destination, else: origin
+    unless collision?(destination, row, col) do
+      %{moving: true, position: destination}
+    else
+      %{moving: true, position: position}
+    end
   end
 
   defp collision?(destination, old_row, old_col) do
