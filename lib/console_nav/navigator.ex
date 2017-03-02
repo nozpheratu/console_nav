@@ -12,9 +12,12 @@ defmodule ConsoleNav.Navigator do
     GenServer.start_link(__MODULE__, state, name: __MODULE__)
   end
 
-  def init(state) do
-    {:ok, state}
-  end
+  def init(state), do: {:ok, state}
+
+  def input(:left), do: GenServer.cast(__MODULE__, :left)
+  def input(:right), do: GenServer.cast(__MODULE__, :right)
+  def input(:up), do: GenServer.cast(__MODULE__, :up)
+  def input(:down), do: GenServer.cast(__MODULE__, :down)
 
   def handle_cast(:left, state), do: {:noreply, move(state, @left)}
   def handle_cast(:right, state), do: {:noreply, move(state, @right)}
@@ -22,21 +25,19 @@ defmodule ConsoleNav.Navigator do
   def handle_cast(:down, state), do: {:noreply, move(state, @down)}
 
   def position, do: GenServer.call(__MODULE__, :position)
+
   def handle_call(:position, _from, state) do
     {:reply, state.position, state}
   end
 
   def stop, do: GenServer.cast(__MODULE__, :stop)
+
   def handle_cast(:stop, %{position: pos}) do
     {:noreply, %{moving: false, position: pos}}
   end
 
-  def input(:left), do: GenServer.cast(__MODULE__, :left)
-  def input(:right), do: GenServer.cast(__MODULE__, :right)
-  def input(:up), do: GenServer.cast(__MODULE__, :up)
-  def input(:down), do: GenServer.cast(__MODULE__, :down)
-
   defp move(state = %{moving: moving}, _dir) when moving, do: state
+
   defp move(%{position: position}, dir) do
     {row, col} = position
     {x, y} = dir
