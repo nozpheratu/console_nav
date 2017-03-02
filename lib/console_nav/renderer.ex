@@ -4,9 +4,11 @@ defmodule ConsoleNav.Renderer do
   alias ConsoleNav.Navigator
 
   @refresh_interval 100
-  @coin "$ "
-  @player "\x{2588}\x{2588}"
-  @wall "\x{2588}\x{2588}"
+  @coin  [IO.ANSI.bright, IO.ANSI.yellow, "$ ", IO.ANSI.reset]
+  @player [IO.ANSI.blue, "\x{2588}\x{2588}", IO.ANSI.reset]
+  @wall [IO.ANSI.white, "\x{2588}\x{2588}"]
+  @corner [IO.ANSI.white, "\x{2588}\x{2588}\x{2588}\x{2588}"]
+  @space [IO.ANSI.black, "  "]
 
   def start, do: loop
 
@@ -22,10 +24,17 @@ defmodule ConsoleNav.Renderer do
     loop
   end
 
+  defp is_player?(pos), do: Navigator.position == pos
+
+  defp clear_screen, do: [IO.ANSI.clear, IO.ANSI.home]
+
   defp draw_board(board) do
-    Matrix.to_list(board)
+    list = Matrix.to_list(board)
+    text = list
     |> Enum.with_index
-    |> Enum.map(fn(line) -> ["\r", draw_line(line), "\n"] end)
+    |> Enum.map(fn(line) -> ["\r", @wall, draw_line(line), @wall, "\n"] end)
+    border = Enum.map(Enum.at(list, 1), fn(_) -> @wall end)
+    ["#{@corner}#{border}\n", text, "\r#{border}#{@corner}\n"]
   end
 
   defp draw_line(line) do
@@ -35,21 +44,17 @@ defmodule ConsoleNav.Renderer do
   end
 
   defp draw_cell(char, pos) do
-    if pos == Navigator.position do
-      # Flag the player as stationary each time they are rendered. This prevents
-      # the player from being able to move multiple cells per render cycle.
-      Navigator.stop
-      [IO.ANSI.blue, @player, IO.ANSI.reset]
-    else
-      case char do
-        3 -> [IO.ANSI.bright, IO.ANSI.yellow, @coin, IO.ANSI.reset]
-        1 -> [IO.ANSI.white, @wall]
-        _ -> [IO.ANSI.black, "  "]
-      end
-    end
+    if is_player?(pos), do: draw_player, else: draw_object(char)
   end
 
-  defp clear_screen, do: [IO.ANSI.clear, IO.ANSI.home]
+  defp draw_player do
+    Navigator.stop
+    @player
+  end
+
+  defp draw_object(char) when char == 1, do: @wall
+  defp draw_object(char) when char == 3, do: @coin
+  defp draw_object(_), do: @space
 
   defp draw_wallet(wallet) do
     [
