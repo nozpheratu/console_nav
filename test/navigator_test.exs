@@ -1,50 +1,58 @@
 defmodule NavigatorTest do
   use ExUnit.Case
   alias ConsoleNav.Navigator
+  alias ConsoleNav.GameData
+
+  defp board do
+    %{
+      0 => %{0 => 0,1 => 0, 2 => 0},
+      1 => %{0 => 0,1 => 0, 2 => 0},
+      2 => %{0 => 0,1 => 0, 2 => 0}
+    }
+  end
+
+  defp game do
+    {:ok, pid} = GenServer.start_link(GameData, %{board: board, wallet: 0})
+    pid
+  end
+
+  defp navigator(pos) do
+    initial_state = %{position: pos, game: game, moving: false}
+    {:ok, player} = GenServer.start_link(Navigator, initial_state)
+    player
+  end
 
   test "retrieving the position" do
     pos = {0,:rand.uniform(10)}
-    {:ok, pid} = GenServer.start_link(Navigator, %{position: pos})
-    assert pos == GenServer.call(pid, :position)
+    player = navigator(pos)
+    assert pos == GenServer.call(player, :position)
   end
 
   test "move right" do
-    pos = {0, 0}
-    {:ok, pid} = GenServer.start_link(Navigator, %{position: pos}, name: :test)
-    {y, x} = GenServer.call(pid, :position)
-    GenServer.cast(pid, :right)
-    assert {y, x + 1} == GenServer.call(pid, :position)
+    player = navigator({0,0})
+    {y, x} = GenServer.call(player, :position)
+    GenServer.cast(player, :right)
+    assert {y, x + 1} == GenServer.call(player, :position)
   end
 
   test "move left" do
-    pos = {0, 1}
-    {:ok, pid} = GenServer.start_link(Navigator, %{position: pos}, name: :test)
-    {y, x} = GenServer.call(pid, :position)
-    GenServer.cast(pid, :left)
-    assert {y, x - 1} == GenServer.call(pid, :position)
+    player = navigator({0,1})
+    {y, x} = GenServer.call(player, :position)
+    GenServer.cast(player, :left)
+    assert {y, x - 1} == GenServer.call(player, :position)
   end
 
   test "move up" do
-    pos = {1, 0}
-    {:ok, pid} = GenServer.start_link(Navigator, %{position: pos}, name: :test)
-    {y, x} = GenServer.call(pid, :position)
-    GenServer.cast(pid, :up)
-    assert {y - 1, x} == GenServer.call(pid, :position)
+    player = navigator({1,0})
+    {y, x} = GenServer.call(player, :position)
+    GenServer.cast(player, :up)
+    assert {y - 1, x} == GenServer.call(player, :position)
   end
 
   test "move down" do
-    pos = {0, 0}
-    {:ok, pid} = GenServer.start_link(Navigator, %{position: pos}, name: :test)
-    {y, x} = GenServer.call(pid, :position)
-    GenServer.cast(pid, :down)
-    assert {y + 1, x} == GenServer.call(pid, :position)
-  end
-
-  test "can't move with a state of moving" do
-    pos = {0, 0}
-    {:ok, pid} = GenServer.start_link(Navigator, %{position: pos, moving: true}, name: :test)
-    {y, x} = GenServer.call(pid, :position)
-    GenServer.cast(pid, :down)
-    assert {0, 0} == GenServer.call(pid, :position)
+    player = navigator({0,0})
+    {y, x} = GenServer.call(player, :position)
+    GenServer.cast(player, :down)
+    assert {y + 1, x} == GenServer.call(player, :position)
   end
 end

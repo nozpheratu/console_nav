@@ -28,20 +28,16 @@ defmodule ConsoleNav.GameData do
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   ]
 
-  def start do
-    initial_state = %{board: Matrix.from_list(@initial_board), wallet: 0}
-    GenServer.start_link(__MODULE__, initial_state, name: __MODULE__)
+  def start(board \\ @initial_board) do
+    state = %{board: Matrix.from_list(board), wallet: 0}
+    GenServer.start_link(__MODULE__, state, name: __MODULE__)
   end
 
-  def init(initial_state) do
-    {:ok, initial_state}
-  end
+  def init(state), do: {:ok, state}
+
+  def handle_call(:state, _from, state), do: {:reply, state, state}
 
   def handle_cast({:set, assigned_state}, state) do
     {:noreply, Map.merge(state, assigned_state)}
-  end
-
-  def handle_call(:state, _from, state) do
-    {:reply, state, state}
   end
 end
