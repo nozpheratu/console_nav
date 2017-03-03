@@ -7,7 +7,6 @@ defmodule ConsoleNav.Renderer do
   @coin  [IO.ANSI.bright, IO.ANSI.yellow, "$ ", IO.ANSI.reset]
   @player [IO.ANSI.blue, "\x{2588}\x{2588}", IO.ANSI.reset]
   @wall [IO.ANSI.white, "\x{2588}\x{2588}"]
-  @corner [IO.ANSI.white, "\x{2588}\x{2588}\x{2588}\x{2588}"]
   @space [IO.ANSI.black, "  "]
 
   def start, do: loop
@@ -29,12 +28,14 @@ defmodule ConsoleNav.Renderer do
   defp clear_screen, do: [IO.ANSI.clear, IO.ANSI.home]
 
   defp draw_board(board) do
-    list = Matrix.to_list(board)
-    text = list
+    board = Matrix.to_list(board)
     |> Enum.with_index
     |> Enum.map(fn(line) -> ["\r", @wall, draw_line(line), @wall, "\n"] end)
-    border = Enum.map(Enum.at(list, 1), fn(_) -> @wall end)
-    ["#{@corner}#{border}\n", text, "\r#{border}#{@corner}\n"]
+    # add top and bottom borders
+    border = Enum.at(Enum.at(board, 0), 2)
+    |> Enum.map(fn(_) -> @wall end)
+    |> Enum.concat([@wall, @wall]) # compensate for vertically walls added above
+    ["#{border}\n", board, "\r#{border}\n"]
   end
 
   defp draw_line(line) do
