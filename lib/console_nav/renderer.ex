@@ -13,7 +13,7 @@ defmodule ConsoleNav.Renderer do
   def start, do: loop
 
   defp loop do
-    state = GameData.state
+    state = GenServer.call(GameData, :state)
     IO.write [
       clear_screen,
       draw_board(state.board),
@@ -24,7 +24,7 @@ defmodule ConsoleNav.Renderer do
     loop
   end
 
-  defp is_player?(pos), do: Navigator.position == pos
+  defp is_player?(pos), do: GenServer.call(Navigator, :position) == pos
 
   defp clear_screen, do: [IO.ANSI.clear, IO.ANSI.home]
 
@@ -48,7 +48,7 @@ defmodule ConsoleNav.Renderer do
   end
 
   defp draw_player do
-    Navigator.stop
+    GenServer.cast(Navigator, :stop)
     @player
   end
 

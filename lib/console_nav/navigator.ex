@@ -14,23 +14,14 @@ defmodule ConsoleNav.Navigator do
 
   def init(state), do: {:ok, state}
 
-  def input(:left), do: GenServer.cast(__MODULE__, :left)
-  def input(:right), do: GenServer.cast(__MODULE__, :right)
-  def input(:up), do: GenServer.cast(__MODULE__, :up)
-  def input(:down), do: GenServer.cast(__MODULE__, :down)
-
-  def handle_cast(:left, state), do: {:noreply, move(state, @left)}
+  def handle_cast(:left, state),  do: {:noreply, move(state, @left)}
   def handle_cast(:right, state), do: {:noreply, move(state, @right)}
-  def handle_cast(:up, state), do: {:noreply, move(state, @up)}
-  def handle_cast(:down, state), do: {:noreply, move(state, @down)}
-
-  def position, do: GenServer.call(__MODULE__, :position)
+  def handle_cast(:up, state),    do: {:noreply, move(state, @up)}
+  def handle_cast(:down, state),  do: {:noreply, move(state, @down)}
 
   def handle_call(:position, _from, state) do
     {:reply, state.position, state}
   end
-
-  def stop, do: GenServer.cast(__MODULE__, :stop)
 
   def handle_cast(:stop, %{position: pos}) do
     {:noreply, %{moving: false, position: pos}}
@@ -51,14 +42,12 @@ defmodule ConsoleNav.Navigator do
 
   defp collision?(destination, old_row, old_col) do
     {new_row, new_col} = destination
-    game_state = GameData.state
-    board =  game_state.board
-    wallet = game_state.wallet
-    # ensure that anywhere the player moves is assigned as a blank space
-    board = put_in board[old_row][old_col], 0
+    %{board: board, wallet: wallet} = GenServer.call(GameData, :state)
+    # set every cell that the player moves into to 0 (blank space)
+    board = put_in(board[old_row][old_col], 0)
     cell = board[new_row][new_col]
-    %{board: board, wallet: (if cell == 3, do: wallet + 1, else: wallet)}
-    |> GameData.set
+    state = %{board: board, wallet: (if cell == 3, do: wallet + 1, else: wallet)}
+    GenServer.cast(GameData, {:set, state})
     Enum.member?([1, nil], cell)
   end
 end
