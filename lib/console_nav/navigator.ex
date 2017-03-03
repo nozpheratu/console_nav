@@ -7,7 +7,7 @@ defmodule ConsoleNav.Navigator do
   @up {0, -1}
   @down {0, 1}
 
-  def start_link(initial_position \\ {0,0}) do
+  def start(initial_position \\ {0,0}) do
     state = %{moving: false, position: initial_position}
     GenServer.start_link(__MODULE__, state, name: __MODULE__)
   end

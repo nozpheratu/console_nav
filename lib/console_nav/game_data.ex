@@ -32,7 +32,7 @@ defmodule ConsoleNav.GameData do
     %{board: Matrix.from_list(@initial_board), wallet: 0}
   end
 
-  def start_link do
+  def start do
     GenServer.start_link(__MODULE__, initial_state, name: __MODULE__)
   end
 
