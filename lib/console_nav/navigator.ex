@@ -33,7 +33,7 @@ defmodule ConsoleNav.Navigator do
 
   defp move(state = %{moving: moving}, _dir) when moving, do: state
 
-  defp move(state = %{position: position, game: game}, dir) do
+  defp move(state = %{position: position}, dir) do
     {row, col} = position
     {x, y} = dir
     destination = {row + y, col + x}
@@ -51,8 +51,8 @@ defmodule ConsoleNav.Navigator do
     %{board: board} = GenServer.call(game, :state)
     # set every cell that the player moves into to 0 (blank space)
     board = put_in(board[old_row][old_col], 0)
-    cell = board[new_row][new_col]
     GenServer.cast(game, {:set, %{board: board}})
+    cell = board[new_row][new_col]
     state = if(cell == 3, do: Map.merge(state, %{wallet: wallet + 1}), else: state)
     {state, Enum.member?([1, nil], cell)}
   end
