@@ -16,7 +16,7 @@ defmodule ConsoleNav.Renderer do
     IO.write [
       clear_screen,
       draw_board(state.board),
-      draw_wallet(state.wallet),
+      draw_wallet,
       draw_controls
     ]
     :timer.sleep @refresh_interval
@@ -57,7 +57,8 @@ defmodule ConsoleNav.Renderer do
   defp draw_object(char) when char == 3, do: @coin
   defp draw_object(_), do: @space
 
-  defp draw_wallet(wallet) do
+  defp draw_wallet do
+    wallet = GenServer.call(Navigator, :wallet)
     [
       IO.ANSI.reset,
       "\n\rWallet: ",

@@ -8,7 +8,7 @@ defmodule ConsoleNav.Navigator do
   @down {0, 1}
 
   def start(game \\ GameData, position \\ {0,0}) do
-    state = %{moving: false, position: position, game: game}
+    state = %{moving: false, position: position, game: game, wallet: 0}
     GenServer.start_link(__MODULE__, state, name: __MODULE__)
   end
 
@@ -23,6 +23,10 @@ defmodule ConsoleNav.Navigator do
     {:reply, state.position, state}
   end
 
+  def handle_call(:wallet, _from, state) do
+    {:reply, state.wallet, state}
+  end
+
   def handle_cast(:stop, state) do
     {:noreply, Map.merge(state, %{moving: false})}
   end
@@ -33,21 +37,23 @@ defmodule ConsoleNav.Navigator do
     {row, col} = position
     {x, y} = dir
     destination = {row + y, col + x}
-    unless collision?(game, destination, row, col) do
+    {state, collision} = check_collision(state, destination, row, col)
+    unless collision do
       Map.merge(state, %{moving: true, position: destination})
     else
       state
     end
   end
 
-  defp collision?(game, destination, old_row, old_col) do
+  defp check_collision(state, destination, old_row, old_col) do
+    %{game: game, wallet: wallet} = state
     {new_row, new_col} = destination
-    %{board: board, wallet: wallet} = GenServer.call(game, :state)
+    %{board: board} = GenServer.call(game, :state)
     # set every cell that the player moves into to 0 (blank space)
     board = put_in(board[old_row][old_col], 0)
     cell = board[new_row][new_col]
-    state = %{board: board, wallet: (if cell == 3, do: wallet + 1, else: wallet)}
-    GenServer.cast(game, {:set, state})
-    Enum.member?([1, nil], cell)
+    GenServer.cast(game, {:set, %{board: board}})
+    state = if(cell == 3, do: Map.merge(state, %{wallet: wallet + 1}), else: state)
+    {state, Enum.member?([1, nil], cell)}
   end
 end

@@ -25,7 +25,7 @@ defmodule ConsoleNav.GameData do
 
   def start(board \\ @initial_board) do
     board = CoinGenerator.insert(board, 0)
-    state = %{board: Matrix.from_list(board), wallet: 0}
+    state = %{board: Matrix.from_list(board)}
     GenServer.start_link(__MODULE__, state, name: __MODULE__)
   end
 

@@ -12,14 +12,31 @@ defmodule NavigatorTest do
   end
 
   defp game do
-    {:ok, pid} = GenServer.start_link(GameData, %{board: board, wallet: 0})
+    {:ok, pid} = GenServer.start_link(GameData, %{board: board})
     pid
   end
 
-  defp navigator(pos) do
-    initial_state = %{position: pos, game: game, moving: false}
+  defp navigator(pos \\ {0,0}, wallet \\ 0, game \\ game) do
+    initial_state = %{position: pos, game: game, moving: false, wallet: 0}
     {:ok, player} = GenServer.start_link(Navigator, initial_state)
     player
+  end
+
+  test "retrieving the wallet" do
+    player = navigator({0,0}, 0)
+    assert 0 == GenServer.call(player, :wallet)
+  end
+
+  test "collecting a coin" do
+    # 3 represents a coin
+    board = %{
+      0 => %{0 => 0, 1 => 3}
+    }
+    {:ok, game} = GenServer.start_link(GameData, %{board: board})
+    player = navigator({0,0}, 0, game)
+    assert 0 == GenServer.call(player, :wallet)
+    GenServer.cast(player, :right)
+    assert 1 == GenServer.call(player, :wallet)
   end
 
   test "retrieving the position" do
